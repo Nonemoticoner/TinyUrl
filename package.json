@@ -1,0 +1,23 @@
+{
+  "name": "tiny-url",
+  "version": "0.0.1",
+  "description": "Create redirect links easiely with use of Express",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nonemoticoner/TinyUrl.git"
+  },
+  "author": "Nonemoticoner",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Nonemoticoner/TinyUrl/issues"
+  },
+  "homepage": "https://github.com/Nonemoticoner/TinyUrl#readme",
+  "dependencies": {
+    "body-parser": "^1.13.3",
+    "express": "^4.13.3"
+  }
+}

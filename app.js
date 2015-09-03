@@ -1,6 +1,7 @@
 // Libraries
 var express = require('express');
 var bodyParser = require('body-parser');
+var mysql = require('mysql');
 
 // Express setup
 var app = express();
@@ -8,6 +9,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: true
 }));
+
+// MySQL connection setup
+var connection = mysql.createConnection({
+	host: 'localhost',
+	user: 'tinyurl',
+	password: 'password',
+	multipleStatements: true
+});
+
+connection.query('USE TinyUrl');
 
 // VARIABLES:
 // AUTH_KEY for preventing unauthorized creations of links - CHOOSE YOURSELF (string)

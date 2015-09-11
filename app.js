@@ -2,6 +2,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+var pc = require('password-creator');
 
 // Express setup
 var app = express();
@@ -9,6 +10,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: true
 }));
+
+// Password-Creator preferences - YOU CAN CHOOSE YOURSELF
+// This will define how links will look if not keyword specified
+var pc_config = {
+	sets: {
+		letters: true,
+		lowercase: true,
+		uppercase: false,
+		digits: true,
+		special: false,
+		space: false,
+		exclude: ""
+	},
+	length: 5
+};
 
 // MySQL connection setup
 var connection = mysql.createConnection({
@@ -39,13 +55,49 @@ var LETTER = "fwd";
  * 
  * Resultant redirect link: http://<your_domain>/<LETTER>/<KEYWORD>
  */
-app.get('/create', function (req, res) {
+app.post('/create', function (req, res) {
 	var url = req.query.url,
-		auth_key = (req.query.auth_key == undefined || req.query.auth_key == '') ? undefined : req.query.auth_key
+		auth_key = (req.query.auth_key == undefined || req.query.auth_key == '') ? undefined : req.query.auth_key,
 		keyword = (req.query.keyword == undefined || req.query.keyword == '') ? undefined : req.query.keyword;
 
-	// here more code soon
-	// ...
+	// create keyword if not specified
+	keyword = pc.create(pc_config);
+
+	if(auth_key == AUTH_KEY){
+		// post data to db
+		connection.query("INSERT INTO Links (keyword, url) VALUES (" + keyword + ", " + url + ");", function (err, rows, fields) {
+			if (err) {
+				throw err;
+				res.status(500).send("Database error!");
+			}
+			else{
+				res.status(201).send("Redirect link successfully created!");
+			}
+		});
+	}
+	else{
+		res.status(401).send("Wrong auth key!");
+	}
+
+});
+
+/*
+ * REDIRECT -------------------------------------------------------------------------------------------------------------
+ */
+app.get('/' + LETTER + '/:id', function (req, res) {
+	var id = req.params.id;console.log("get id: " + id);
+	
+	// request data from db
+	connection.query("SELECT url FROM Links WHERE keyword='" + id + "';", function (err, rows, fields) {
+		if (err) throw err;
+		
+		if(typeof rows == "undefined"){//rows[0].url
+			res.status(404).send("<h1>404 - Not Found</h1>");console.log("404");
+		}
+		else{
+			res.redirect(rows[0].url);console.log("redirect");
+		}
+	});
 });
 
 /*

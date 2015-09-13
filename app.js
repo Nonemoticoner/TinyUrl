@@ -55,17 +55,53 @@ var LETTER = "fwd";
  * 
  * Resultant redirect link: http://<your_domain>/<LETTER>/<KEYWORD>
  */
-app.post('/create', function (req, res) {
+app.post('/create', function (req, res) {console.log("create req");
 	var url = req.query.url,
 		auth_key = (req.query.auth_key == undefined || req.query.auth_key == '') ? undefined : req.query.auth_key,
 		keyword = (req.query.keyword == undefined || req.query.keyword == '') ? undefined : req.query.keyword;
 
-	// create keyword if not specified
-	keyword = pc.create(pc_config);
-
 	if(auth_key == AUTH_KEY){
+		// create keyword if not specified
+		var makeRandom = false;
+		if(typeof keyword == "undefined"){
+			keyword = pc.create(pc_config);
+
+			makeRandom = true;
+		}
+
+		// check if keyword doesn't already exist in database
+		var isFree = false;
+
+		while(!isFree){
+			connection.query("SELECT * FROM Links WHERE keyword='" + keyword + "';", function (err, rows, fields) {console.log("enter");
+				if (err) {
+					throw err;
+					res.status(500).send("Database error!");
+				}
+				else{
+					// if already exists
+					if(rows[0].keyword == keyword){console.log(rows[0].keyword);
+						// create another keyword
+						if(makeRandom){
+							keyword = pc.create(pc_config);
+						}
+						else{
+							res.send("Such keyword is already in use!");
+						}
+						
+					} 
+					// if doesn't exist
+					else{
+						isFree = true;
+					}
+				}
+			});
+		}
+
 		// post data to db
-		connection.query("INSERT INTO Links (keyword, url) VALUES (" + keyword + ", " + url + ");", function (err, rows, fields) {
+		var query = "INSERT INTO Links (keyword, url) VALUES ('" + keyword + "', '" + url + "');";
+
+		connection.query(query, function (err, rows, fields) {
 			if (err) {
 				throw err;
 				res.status(500).send("Database error!");
@@ -84,7 +120,7 @@ app.post('/create', function (req, res) {
 /*
  * REDIRECT -------------------------------------------------------------------------------------------------------------
  */
-app.get('/' + LETTER + '/:id', function (req, res) {
+app.get('/' + LETTER + '/:id', function (req, res) {console.log("get req");
 	var id = req.params.id;console.log("get id: " + id);
 	
 	// request data from db

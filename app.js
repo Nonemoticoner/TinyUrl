@@ -44,6 +44,26 @@ var AUTH_KEY = undefined;
 // A letter (or word) that is going to indicate that the link is a redirect
 var LETTER = "fwd";
 
+// function for making rand keyword different than other
+function createRandom (taken) {
+	var keyword, 
+		isFree = false;
+
+	while(!isFree){
+		isFree = true;
+
+		keyword = pc.create(pc_config);
+
+		for (var i = taken.length - 1; i >= 0; i--) {
+			if(taken[i].keyword == keyword)
+				isFree = false;
+		}
+	}
+
+	return keyword;
+}
+
+
 /*
  * CREATE -----------------------------------------------------------------------------------------------------------------
  */
@@ -63,51 +83,55 @@ app.post('/create', function (req, res) {console.log("create req");
 	if(auth_key == AUTH_KEY){
 		// create keyword if not specified
 		var makeRandom = false;
-		if(typeof keyword == "undefined"){
-			keyword = pc.create(pc_config);
 
+		if(typeof keyword == "undefined"){
 			makeRandom = true;
 		}
 
-		// check if keyword doesn't already exist in database
-		var isFree = false;
+		// check if randed keyword doesn't already exist in database
+		connection.query("SELECT keyword FROM Links;", function (err, rows, fields) {
+			var isFree = true;
 
-		while(!isFree){
-			connection.query("SELECT * FROM Links WHERE keyword='" + keyword + "';", function (err, rows, fields) {console.log("enter");
-				if (err) {
-					throw err;
-					res.status(500).send("Database error!");
-				}
-				else{
-					// if already exists
-					if(rows[0].keyword == keyword){console.log(rows[0].keyword);
-						// create another keyword
-						if(makeRandom){
-							keyword = pc.create(pc_config);
-						}
-						else{
-							res.send("Such keyword is already in use!");
-						}
-						
-					} 
-					// if doesn't exist
-					else{
-						isFree = true;
-					}
-				}
-			});
-		}
-
-		// post data to db
-		var query = "INSERT INTO Links (keyword, url) VALUES ('" + keyword + "', '" + url + "');";
-
-		connection.query(query, function (err, rows, fields) {
 			if (err) {
 				throw err;
 				res.status(500).send("Database error!");
 			}
 			else{
-				res.status(201).send("Redirect link successfully created!");
+				// if already exists
+				for (var i = rows.length - 1; i >= 0; i--) {
+					if(rows[i].keyword === keyword)
+						isFree = false;
+				}
+
+				if(makeRandom){
+					keyword = createRandom(rows);
+				}
+
+				if(isFree){
+					// post data to db
+					connection.query("INSERT INTO Links (keyword, url) VALUES ('" + keyword + "', '" + url + "');", function (err, rows, fields) {
+						if (err) {
+							throw err;
+							res.status(500).send("Database error!");
+						}
+						else{
+							res.status(201).send("New redirect link has been successfully created!");
+						}
+					});
+				}
+				else{
+					// overwrite to prevent double
+					connection.query("UPDATE Links SET url='" + url + "' WHERE keyword='" + keyword + "';", function (err, rows, fields) {
+						if (err) {
+							throw err;
+							res.status(500).send("Database error!");
+						}
+						else{
+							res.status(201).send("Redirect link has been successfully overwritten!");
+						}
+					});
+
+				}
 			}
 		});
 	}
@@ -120,18 +144,18 @@ app.post('/create', function (req, res) {console.log("create req");
 /*
  * REDIRECT -------------------------------------------------------------------------------------------------------------
  */
-app.get('/' + LETTER + '/:id', function (req, res) {console.log("get req");
-	var id = req.params.id;console.log("get id: " + id);
+app.get('/' + LETTER + '/:id', function (req, res) {
+	var id = req.params.id;
 	
 	// request data from db
 	connection.query("SELECT url FROM Links WHERE keyword='" + id + "';", function (err, rows, fields) {
 		if (err) throw err;
 		
-		if(typeof rows == "undefined"){//rows[0].url
-			res.status(404).send("<h1>404 - Not Found</h1>");console.log("404");
+		if(rows.length == 0){
+			res.status(404).send("<h1>404 - Not Found</h1>");
 		}
-		else{
-			res.redirect(rows[0].url);console.log("redirect");
+		else{console.log("else");
+			res.redirect(rows[0].url);
 		}
 	});
 });

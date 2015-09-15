@@ -154,7 +154,7 @@ app.get('/' + LETTER + '/:id', function (req, res) {
 		if(rows.length == 0){
 			res.status(404).send("<h1>404 - Not Found</h1>");
 		}
-		else{console.log("else");
+		else{
 			res.redirect(rows[0].url);
 		}
 	});

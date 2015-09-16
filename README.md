@@ -1,4 +1,4 @@
-# TinyUrl (under construction)
+# TinyUrl
 Create redirect links easiely with use of Express (Node) and MySQL.
 
 #### Installation
@@ -8,6 +8,10 @@ Create redirect links easiely with use of Express (Node) and MySQL.
   * Fill correct credentials in MySQL **connection** object.
   * You may configure **pc_config** object as you please according to documentation of [password-creator](https://www.npmjs.com/package/password-creator) package. 
   * There are many comments in file those explain how the app works.
+4. Run the application:
+```bash
+$ node app.js
+```
 
 #### How to use
 ###### Creating links
@@ -25,6 +29,13 @@ The redirect link could look like this:
 http://<YOUR_DOMAIN>/fwd/exe
 ```
 Where **fwd** word is up to your choice and can be easiely replaced by any string of your choice. Just change the **LETTER** variable in *app.js*.
+
+#### Technologies
+* [Node](https://github.com/nodejs/node)
+* [Express](https://www.npmjs.com/package/express)
+* [MySQL](https://www.npmjs.com/package/mysql)
+* [body-parser](https://www.npmjs.com/package/body-parser)
+* [password-creator](https://www.npmjs.com/package/password-creator)
 
 #### License
 [MIT](https://github.com/Nonemoticoner/TinyUrl/blob/master/LICENSE)

@@ -1,3 +1,11 @@
+/**
+ * Tiny Url
+ * https://github.com/Nonemoticoner/TinyUrl
+ *
+ * Copyright (c) 2015 Nonemoticoner
+ * Licensed under the MIT license.
+ */
+
 // Libraries
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -98,17 +106,18 @@ app.post('/create', function (req, res) {console.log("create req");
 			}
 			else{
 				// if already exists
-				for (var i = rows.length - 1; i >= 0; i--) {
-					if(rows[i].keyword === keyword)
-						isFree = false;
+				if(!makeRandom){
+					for (var i = rows.length - 1; i >= 0; i--) {
+						if(rows[i].keyword === keyword)
+							isFree = false;
+					}
 				}
-
-				if(makeRandom){
+				else{
 					keyword = createRandom(rows);
 				}
 
 				if(isFree){
-					// post data to db
+					// post new record to db
 					connection.query("INSERT INTO Links (keyword, url) VALUES ('" + keyword + "', '" + url + "');", function (err, rows, fields) {
 						if (err) {
 							throw err;
@@ -170,7 +179,7 @@ app.get('/', function (req, res) {
 /*
  * APP RUN --------------------------------------------------------------------------------------------------------------
  */
-var server =app.listen(80, function () {
+var server = app.listen(80, function () {
 	var host = server.address().address;
 	var port = server.address().port;
 

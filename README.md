@@ -30,6 +30,9 @@ http://<YOUR_DOMAIN>/fwd/exe
 ```
 Where **fwd** word is up to your choice and can be easiely replaced by any string of your choice. Just change the **LETTER** variable in *app.js*.
 
+#### Script behaviour remark
+If there is a keyword specified by user already taken, the link will be overwritten in the database. So, the the previous link that was hidden under that keyword will be lost.
+
 #### Technologies
 * [Node](https://github.com/nodejs/node)
 * [Express](https://www.npmjs.com/package/express)

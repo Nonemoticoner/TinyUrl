@@ -8,7 +8,11 @@ Create redirect links easiely with use of Express (Node) and MySQL.
   * Fill correct credentials in MySQL **connection** object.
   * You may configure **pc_config** object as you please according to documentation of [password-creator](https://www.npmjs.com/package/password-creator) package. 
   * There are many comments in file those explain how the app works.
-4. Run the application:
+4. Install necessary packages:
+```bash
+$ npm install
+```
+5. Run the application:
 ```bash
 $ node app.js
 ```
